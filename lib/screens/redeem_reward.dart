@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../main.dart';
+import '../services/wallet_service.dart';
 import 'success.dart';
 
 class RedeemRewardArgs {
@@ -40,9 +41,17 @@ class _RedeemRewardScreenState extends State<RedeemRewardScreen> {
           Text('\$${amount.toStringAsFixed(2)}',
               style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: kTealDark)),
           const SizedBox(height: 8),
-          Text('Redeeming: \$${amount.toStringAsFixed(2)}\nRemaining: \$0',
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 12, color: Colors.black54)),
+          AnimatedBuilder(
+            animation: WalletScope.of(context),
+            builder: (context, _) {
+              final remaining = WalletScope.of(context).balance;
+              return Text(
+                'Redeeming: \$${amount.toStringAsFixed(2)}\nRemaining: \$${remaining.toStringAsFixed(2)}',
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 12, color: Colors.black54),
+              );
+            },
+          ),
           const SizedBox(height: 16),
           Text('Enter the email or phone number linked to your $method account',
               textAlign: TextAlign.center,
@@ -63,7 +72,17 @@ class _RedeemRewardScreenState extends State<RedeemRewardScreen> {
             width: double.infinity,
             child: FilledButton(
               style: FilledButton.styleFrom(backgroundColor: kLime, foregroundColor: Colors.black, padding: const EdgeInsets.symmetric(vertical: 14)),
-              onPressed: () => Navigator.pushReplacementNamed(context, SuccessScreen.route, arguments: amount),
+              onPressed: () {
+                final wallet = WalletScope.of(context);
+                final ok = wallet.redeem(amount, method: method);
+                if (!ok) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Insufficient balance'))
+                  );
+                  return;
+                }
+                Navigator.pushReplacementNamed(context, SuccessScreen.route, arguments: amount);
+              },
               child: const Text('Next', style: TextStyle(fontWeight: FontWeight.w700)),
             ),
           ),

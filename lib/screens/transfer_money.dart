@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../main.dart';
+import '../services/wallet_service.dart';
 import 'choose_value.dart';
 
 class TransferMoneyScreen extends StatelessWidget {
@@ -56,6 +57,11 @@ class TransferMoneyScreen extends StatelessWidget {
     }
 
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Transfer Money'),
+        backgroundColor: Colors.transparent,
+        scrolledUnderElevation: 0,
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -63,14 +69,12 @@ class TransferMoneyScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(children: [
-                _BalanceChip(amount: WalletScreen.current),
+                const _BalanceChip(),
                 const Spacer(),
                 _RoundIconButton(
                     icon: Icons.notifications_none_rounded, onTap: () {}),
               ]),
               const SizedBox(height: 16),
-              Text('Transfer Money',
-                  style: Theme.of(context).textTheme.titleLarge),
               const SizedBox(height: 24),
               Expanded(
                 child: SingleChildScrollView(
@@ -85,7 +89,7 @@ class TransferMoneyScreen extends StatelessWidget {
                                 ChooseValueScreen.route,
                                 arguments: ChooseValueArgs(method: 'PayPal'))),
                         card(
-                            'https://upload.wikimedia.org/wikipedia/commons/4/4e/Venmo_logo.svg',
+                            'https://upload.wikimedia.org/wikipedia/commons/3/37/Ionicons_logo-venmo.svg',
                             'Venmo',
                             'Transfer Money to your Venmo Account',
                             () => Navigator.pushNamed(context,
@@ -102,7 +106,7 @@ class TransferMoneyScreen extends StatelessWidget {
                                 ChooseValueScreen.route,
                                 arguments: ChooseValueArgs(method: 'Amazon'))),
                         card(
-                            'https://upload.wikimedia.org/wikipedia/commons/c/cc/Uber_logo_2018.svg',
+                            'https://upload.wikimedia.org/wikipedia/commons/5/58/Uber_logo_2018.svg',
                             'Uber',
                             'Get Uber Gift card using wallet money',
                             () => Navigator.pushNamed(context,
@@ -141,22 +145,32 @@ class TransferMoneyScreen extends StatelessWidget {
 }
 
 class _BalanceChip extends StatelessWidget {
-  const _BalanceChip({required this.amount});
-  final double amount;
+  const _BalanceChip({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-          color: kLime.withOpacity(.2),
-          borderRadius: BorderRadius.circular(12)),
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
-        const Icon(Icons.attach_money_rounded, size: 18),
-        const SizedBox(width: 6),
-        Text(amount.toStringAsFixed(2),
-            style: const TextStyle(
-                fontSize: 16, fontWeight: FontWeight.w700)),
-      ]),
+    final wallet = WalletScope.of(context);
+    return AnimatedBuilder(
+      animation: wallet,
+      builder: (context, _) {
+        final amount = wallet.balance;
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(32),
+            border: Border.all(color: kLime, width: 2),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.account_balance_wallet_outlined, size: 18),
+              const SizedBox(width: 8),
+              Text('\$${amount.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.w700)),
+            ],
+          ),
+        );
+      },
     );
   }
 }

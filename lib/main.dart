@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'services/wallet_service.dart';
 
 import 'screens/choose_value.dart';
 import 'screens/custom_amount.dart';
@@ -16,27 +17,32 @@ const kCardAlt = Color(0xFFF0F6FA);
 
 class WalletApp extends StatelessWidget {
   const WalletApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Travel Wallet',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        scaffoldBackgroundColor: kBg,
-        textTheme: const TextTheme(
-          titleLarge: TextStyle(fontWeight: FontWeight.w700),
-          titleMedium: TextStyle(fontWeight: FontWeight.w700),
+    final wallet = WalletModel();
+    return WalletScope(
+      notifier: wallet,
+      child: MaterialApp(
+        title: 'Travel Wallet',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          useMaterial3: true,
+          scaffoldBackgroundColor: kBg,
+          textTheme: const TextTheme(
+            titleLarge: TextStyle(fontWeight: FontWeight.w700),
+            titleMedium: TextStyle(fontWeight: FontWeight.w700),
+          ),
         ),
+        home: const WalletScreen(),
+        routes: {
+          ChooseValueScreen.route: (_) => const ChooseValueScreen(),
+          CustomAmountScreen.route: (_) => const CustomAmountScreen(),
+          RedeemRewardScreen.route: (_) => const RedeemRewardScreen(),
+          SuccessScreen.route: (_) => const SuccessScreen(),
+          TransferMoneyScreen.route: (_) => const TransferMoneyScreen(),
+        },
       ),
-      home: const WalletScreen(),
-      routes: {
-        ChooseValueScreen.route: (_) => const ChooseValueScreen(),
-        CustomAmountScreen.route: (_) => const CustomAmountScreen(),
-        RedeemRewardScreen.route: (_) => const RedeemRewardScreen(),
-        SuccessScreen.route: (_) => const SuccessScreen(),
-        TransferMoneyScreen.route: (_) => const TransferMoneyScreen(),
-      },
     );
   }
 }
@@ -44,14 +50,26 @@ class WalletApp extends StatelessWidget {
 class WalletScreen extends StatelessWidget {
   const WalletScreen({super.key});
 
-  static const double total = 42.0;
-  static const double current = 37.74;
+  static const double monthlyGoal = 142.0;
+  
 
   @override
   Widget build(BuildContext context) {
-    final progress = (current / total).clamp(0.0, 1.0);
 
-    return Scaffold(
+    final wallet = WalletScope.of(context);
+    final current = wallet.balance;
+    final total = WalletScreen.monthlyGoal;
+    final progress = (total <= 0) ? 0.0 : (current / total).clamp(0.0, 1.0);
+    
+
+
+    return AnimatedBuilder(
+      animation: wallet,
+      builder: (context, _) {
+        final current = wallet.balance;
+        final total = WalletScreen.monthlyGoal;
+        final progress = (total <= 0) ? 0.0 : (current / total).clamp(0.0, 1.0);
+        return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -60,7 +78,7 @@ class WalletScreen extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  const _BalanceChip(amount: current),
+                  const _BalanceChip(),
                   const Spacer(),
                   _RoundIconButton(icon: Icons.notifications_none_rounded, onTap: () {}),
                 ],
@@ -90,7 +108,7 @@ class WalletScreen extends StatelessWidget {
               // Mapache (SVG desde assets)
               Center(
                 child: SvgPicture.asset(
-                  'assets/Vector.svg',
+                  'assets/svg/Vector.svg',
                   width: 300,
                   fit: BoxFit.contain,
                 ),
@@ -128,22 +146,39 @@ class WalletScreen extends StatelessWidget {
         ],
       ),
     );
+      },
+    );
   }
 }
 
+
 class _BalanceChip extends StatelessWidget {
-  const _BalanceChip({required this.amount});
-  final double amount;
+  const _BalanceChip({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(color: kLime.withOpacity(.2), borderRadius: BorderRadius.circular(12)),
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
-        const Icon(Icons.attach_money_rounded, size: 18),
-        const SizedBox(width: 6),
-        Text(amount.toStringAsFixed(2), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-      ]),
+    final wallet = WalletScope.of(context);
+    return AnimatedBuilder(
+      animation: wallet,
+      builder: (context, _) {
+        final amount = wallet.balance;
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(32),
+            border: Border.all(color: kLime, width: 2),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.account_balance_wallet_outlined, size: 18),
+              const SizedBox(width: 8),
+              Text('\$${amount.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.w700)),
+            ],
+          ),
+        );
+      },
     );
   }
 }
@@ -154,6 +189,7 @@ class _RoundIconButton extends StatelessWidget {
   final VoidCallback onTap;
   @override
   Widget build(BuildContext context) {
+
     return Material(
       color: kLime.withOpacity(.2),
       shape: const CircleBorder(),
@@ -171,6 +207,7 @@ class _TotalCard extends StatelessWidget {
   final double amount;
   final String subtitle;
   final VoidCallback onClaim;
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -179,26 +216,32 @@ class _TotalCard extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-        child: Row(children: [
-          Expanded(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('\$${amount.toStringAsFixed(2)}', style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800)),
-              const SizedBox(height: 6),
-              Text(subtitle, style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
-            ]),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: kLime.withOpacity(.85),
-              foregroundColor: Colors.black87,
-              elevation: 0,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('\$${amount.toStringAsFixed(2)}',
+                      style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800)),
+                  const SizedBox(height: 6),
+                  Text(subtitle, style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                ],
+              ),
             ),
-            onPressed: onClaim,
-            child: const Text('Claim', style: TextStyle(fontWeight: FontWeight.w700)),
-          ),
-        ]),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: kLime.withOpacity(.85),
+                foregroundColor: Colors.black87,
+                elevation: 0,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              ),
+              onPressed: onClaim,
+              child: const Text('Claim', style: TextStyle(fontWeight: FontWeight.w700)),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -210,6 +253,7 @@ class _EarningsProgress extends StatelessWidget {
   final String labelRight;
   @override
   Widget build(BuildContext context) {
+
     return Card(
       elevation: 0,
       color: kCardAlt,
@@ -235,7 +279,7 @@ class _EarningsProgress extends StatelessWidget {
               Align(
                 alignment: Alignment(progress * 2 - 1, 0),
                 child: SvgPicture.asset(
-                  'assets/Group.svg',
+                  'assets/svg/Group.svg',
                   width: 28,
                   fit: BoxFit.contain,
                 ),

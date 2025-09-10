@@ -54,9 +54,9 @@ class ChooseValueScreen extends StatelessWidget {
               crossAxisSpacing: 16,
               childAspectRatio: 1.7,
               children: [
-                pill(r'\$10', () => go(10)),
-                pill(r'\$20', () => go(20)),
-                pill(r'\$37.74', () => go(37.74)),
+                pill(r'$10', () => go(10)),
+                pill(r'$20', () => go(20)),
+                pill(r'$30', () => go(30)),
                 pill('Custom', () => go(0)),
               ],
             ),
