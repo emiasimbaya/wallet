@@ -25,7 +25,7 @@ class SuccessScreen extends StatelessWidget {
             // 👇🏼 REMPLAZO DEL CustomPaint POR SVG
             Center(
               child: SvgPicture.asset(
-                'assets/Vector.svg', // tu mapache
+                'assets/svg/Vector.svg', // tu mapache
                 width: 200,
                 fit: BoxFit.contain,
               ),
