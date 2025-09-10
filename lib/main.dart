@@ -73,7 +73,7 @@ class WalletScreen extends StatelessWidget {
               _TotalCard(
                 amount: current,
                 subtitle: 'You earned in this month',
-                onClaim: () => Navigator.pushNamed(context, ChooseValueScreen.route),
+                onClaim: () => Navigator.pushNamed(context, TransferMoneyScreen.route),
               ),
 
               const SizedBox(height: 24),
@@ -126,13 +126,6 @@ class WalletScreen extends StatelessWidget {
             label: 'Profile',
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => Navigator.pushNamed(context, TransferMoneyScreen.route),
-        backgroundColor: kLime,
-        foregroundColor: Colors.black,
-        label: const Text('Transfer'),
-        icon: const Icon(Icons.send),
       ),
     );
   }
