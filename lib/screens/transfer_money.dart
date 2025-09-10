@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../main.dart';
+import '../services/api_service.dart';
 import 'choose_value.dart';
 
 class TransferMoneyScreen extends StatelessWidget {
@@ -35,6 +36,8 @@ class TransferMoneyScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final apiService = ApiService();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Transfer Money'),
@@ -44,8 +47,22 @@ class TransferMoneyScreen extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(children: [
-          _tile(context, 'PayPal', 'Transfer Money to your PayPal Account', Icons.account_balance_wallet_outlined,
-              () => Navigator.pushNamed(context, ChooseValueScreen.route)),
+          _tile(
+            context,
+            'PayPal',
+            'Transfer Money to your PayPal Account',
+            Icons.account_balance_wallet_outlined,
+            () async {
+              try {
+                await apiService.transferMoney(provider: 'paypal', amount: 10);
+                // Navigate after successful transfer or to continue the flow.
+                Navigator.pushNamed(context, ChooseValueScreen.route);
+              } catch (e) {
+                ScaffoldMessenger.of(context)
+                    .showSnackBar(SnackBar(content: Text('Transfer failed: $e')));
+              }
+            },
+          ),
           const SizedBox(height: 12),
           _tile(context, 'Venmo', 'Transfer Money to your Venmo account', Icons.payments_outlined, () {}),
           const SizedBox(height: 12),
