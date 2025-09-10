@@ -90,7 +90,7 @@ class WalletScreen extends StatelessWidget {
               // Mapache (SVG desde assets)
               Center(
                 child: SvgPicture.asset(
-                  'assets/Vector.svg',
+                  'assets/svg/Vector.svg',
                   width: 300,
                   fit: BoxFit.contain,
                 ),
@@ -242,7 +242,7 @@ class _EarningsProgress extends StatelessWidget {
               Align(
                 alignment: Alignment(progress * 2 - 1, 0),
                 child: SvgPicture.asset(
-                  'assets/Group.svg',
+                  'assets/svg/Group.svg',
                   width: 28,
                   fit: BoxFit.contain,
                 ),
