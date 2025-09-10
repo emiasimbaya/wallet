@@ -4,7 +4,8 @@ import 'redeem_reward.dart';
 
 class CustomAmountArgs {
   final double presetAmount;
-  CustomAmountArgs({this.presetAmount = 0});
+  final String method;
+  CustomAmountArgs({this.presetAmount = 0, required this.method});
 }
 
 class CustomAmountScreen extends StatefulWidget {
@@ -20,13 +21,17 @@ class _CustomAmountScreenState extends State<CustomAmountScreen> {
   final _noteCtrl = TextEditingController();
   final _to = 'John Doe';
   final _from = 'Main Wallet';
+  String _method = 'PayPal';
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final args = ModalRoute.of(context)?.settings.arguments as CustomAmountArgs?;
-    if (args != null && args.presetAmount > 0) {
-      _amountCtrl.text = args.presetAmount.toStringAsFixed(2);
+    if (args != null) {
+      _method = args.method;
+      if (args.presetAmount > 0) {
+        _amountCtrl.text = args.presetAmount.toStringAsFixed(2);
+      }
     }
   }
 
@@ -94,7 +99,8 @@ class _CustomAmountScreenState extends State<CustomAmountScreen> {
               ),
               onPressed: () {
                 final amt = double.tryParse(_amountCtrl.text) ?? 0;
-                Navigator.pushNamed(context, RedeemRewardScreen.route, arguments: amt);
+                Navigator.pushNamed(context, RedeemRewardScreen.route,
+                    arguments: RedeemRewardArgs(amount: amt, method: _method));
               },
               child: const Text('Continue', style: TextStyle(fontWeight: FontWeight.w700)),
             ),

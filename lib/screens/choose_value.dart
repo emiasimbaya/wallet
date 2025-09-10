@@ -2,12 +2,20 @@ import 'package:flutter/material.dart';
 import '../main.dart';
 import 'custom_amount.dart';
 
+class ChooseValueArgs {
+  final String method;
+  ChooseValueArgs({required this.method});
+}
+
 class ChooseValueScreen extends StatelessWidget {
   const ChooseValueScreen({super.key});
   static const route = '/choose-value';
 
   @override
   Widget build(BuildContext context) {
+    final args = ModalRoute.of(context)?.settings.arguments as ChooseValueArgs?;
+    final method = args?.method ?? 'PayPal';
+
     Widget pill(String text, VoidCallback onTap) {
       return InkWell(
         onTap: onTap,
@@ -27,12 +35,12 @@ class ChooseValueScreen extends StatelessWidget {
 
     void go(double amount) {
       Navigator.pushNamed(context, CustomAmountScreen.route,
-          arguments: CustomAmountArgs(presetAmount: amount));
+          arguments: CustomAmountArgs(presetAmount: amount, method: method));
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Transfer to PayPal'),
+        title: Text('Transfer to $method'),
         backgroundColor: Colors.transparent,
         scrolledUnderElevation: 0,
       ),

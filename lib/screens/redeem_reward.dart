@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import '../main.dart';
 import 'success.dart';
 
+class RedeemRewardArgs {
+  final double amount;
+  final String method;
+  RedeemRewardArgs({required this.amount, required this.method});
+}
+
 class RedeemRewardScreen extends StatefulWidget {
   const RedeemRewardScreen({super.key});
   static const route = '/redeem';
@@ -15,7 +21,9 @@ class _RedeemRewardScreenState extends State<RedeemRewardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final amount = (ModalRoute.of(context)?.settings.arguments as double?) ?? 37.74;
+    final args = ModalRoute.of(context)?.settings.arguments as RedeemRewardArgs?;
+    final amount = args?.amount ?? 37.74;
+    final method = args?.method ?? 'PayPal';
 
     return Scaffold(
       appBar: AppBar(
@@ -36,9 +44,9 @@ class _RedeemRewardScreenState extends State<RedeemRewardScreen> {
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 12, color: Colors.black54)),
           const SizedBox(height: 16),
-          const Text('Enter the email or phone number linked to your PayPal account',
+          Text('Enter the email or phone number linked to your $method account',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 12, color: Colors.black54)),
+              style: const TextStyle(fontSize: 12, color: Colors.black54)),
           const SizedBox(height: 12),
           TextField(
             controller: _emailCtrl,
